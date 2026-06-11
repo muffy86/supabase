@@ -1,21 +1,18 @@
 #!/bin/bash
-# Bootstrap hook for non-.agents repos.
-# Ensures .agents is cloned, then delegates to its master session-start.
+# Bootstrap hook — delegates to .agents master session-start.
 set -euo pipefail
 
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
-AGENTS_DIR="/home/user/.agents"
+AGENTS_DIR="${HOME:-/home/user}/.agents"
 MASTER_HOOK="${AGENTS_DIR}/.claude/hooks/session-start.sh"
 
-# Clone .agents if it isn't present in this container
 if [ ! -d "${AGENTS_DIR}/.git" ]; then
-  git clone https://github.com/muffy86/.agents.git "${AGENTS_DIR}" -q 2>/dev/null || true
+  git clone https://github.com/muffy86/.agents.git "${AGENTS_DIR}" -q
 fi
 
-# Delegate to master hook
 if [ -x "$MASTER_HOOK" ]; then
   exec "$MASTER_HOOK"
 else

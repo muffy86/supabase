@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/user/.agents/.claude/hooks/bootstrap.sh"
+            "command": "bash -c 'exec \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.claude/hooks/bootstrap.sh\"'"
           }
         ]
       }
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/user/.agents/.claude/hooks/memory-save.sh"
+            "command": "${HOME:-/home/user}/.agents/.claude/hooks/memory-save.sh"
           }
         ]
       }
