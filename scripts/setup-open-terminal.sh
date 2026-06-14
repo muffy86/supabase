@@ -18,7 +18,7 @@ if [[ -z "$API_KEY" ]]; then
   elif command -v python3 > /dev/null 2>&1; then
     API_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
   else
-    API_KEY=$(tr -dc 'a-f0-9' < /dev/urandom | head -c 64)
+    API_KEY=$(LC_ALL=C tr -dc 'a-f0-9' < /dev/urandom | head -c 64)
   fi
   echo "  Generated API key: $API_KEY"
   echo "  Add to .env: OPEN_TERMINAL_API_KEY=$API_KEY"
@@ -41,13 +41,13 @@ wait_for_health() {
 }
 
 if [[ "$INSTALL_MODE" == "docker" ]]; then
-  docker rm -f open-terminal > /dev/null 2>&1 || true
+  docker rm -f supabase-open-terminal > /dev/null 2>&1 || true
   docker run -d \
-    --name open-terminal \
+    --name supabase-open-terminal \
     --restart unless-stopped \
     -p "${PORT}:8000" \
     -e "OPEN_TERMINAL_API_KEY=${API_KEY}" \
-    -v open_terminal_workspace:/workspace \
+    -v supabase_open_terminal_workspace:/workspace \
     ghcr.io/open-webui/open-terminal:latest
   wait_for_health "http://localhost:${PORT}"
   echo "[open-terminal] Running at http://localhost:${PORT}"
@@ -55,6 +55,7 @@ if [[ "$INSTALL_MODE" == "docker" ]]; then
 elif [[ "$INSTALL_MODE" == "pip" ]]; then
   python3 -m venv .venv-open-terminal
   .venv-open-terminal/bin/pip install --quiet open-terminal
+  pkill -f ".venv-open-terminal/bin/open-terminal run" > /dev/null 2>&1 || true
   nohup .venv-open-terminal/bin/open-terminal run \
     --host 0.0.0.0 \
     --port "${PORT}" \
